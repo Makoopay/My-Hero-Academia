@@ -1,0 +1,35 @@
+name: Filetest
+version: ${project.version}
+main: com.makoopay.filetest.filetest.Filetest
+api-version: 1.16
+authors: [ Makoopay ]
+description: filetest
+commands:
+  Uraraka:
+    description: Dragon Power
+    usage: /<command>
+  Endavour:
+    description: Dragon Power
+    usage: /<command>
+  Tokoyami:
+    description: Dragon Power
+    usage: /<command>
+  Froppy:
+    description: Dragon Power
+    usage: /<command>
+  Todoroki:
+    description: Dragon Power
+    usage: /<command>
+  Deku:
+    description: Dragon Power
+    usage: /<command>
+  Bakugo:
+    description: Dragon Power
+    usage: /<command>
+  DragonTeam:
+    description: Dragon Power
+    usage: /<command>
+
+
+
+

@@ -1,12 +1,17 @@
 package com.makoopay.filetest.filetest;
 
+import net.minecraft.server.v1_16_R3.AxisAlignedBB;
 import net.minecraft.server.v1_16_R3.ItemStack;
+import net.minecraft.server.v1_16_R3.ParticleType;
 import net.minecraft.server.v1_16_R3.World;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.*;
@@ -19,17 +24,19 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public final class Filetest extends JavaPlugin implements Listener {
+
+    FileConfiguration config = getConfig();
 
     public static final HashMap<UUID, Integer> DragonTeam = new HashMap<>();
 
     @Override
     public void onEnable() {
+        config.addDefault("youAreAwesome", true);
+        config.options().copyDefaults(true);
+        saveConfig();
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
         this.getCommand("DragonTeam").setExecutor(new Commands());
         this.getCommand("Bakugo").setExecutor(new Commands());
@@ -39,6 +46,7 @@ public final class Filetest extends JavaPlugin implements Listener {
         this.getCommand("Tokoyami").setExecutor(new Commands());
         this.getCommand("Endavour").setExecutor(new Commands());
         this.getCommand("Uraraka").setExecutor(new Commands());
+        this.getCommand("Quirk").setExecutor(new Commands());
 
     }
 
@@ -48,9 +56,10 @@ public final class Filetest extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void hit(PlayerInteractEvent event) {
+    public void hit1(PlayerInteractEvent event) {
         if (event.getAction().equals(Action.LEFT_CLICK_AIR)) {
             Player p = event.getPlayer();
+            final Player player = event.getPlayer();
 
             if (p.getDisplayName().equalsIgnoreCase("dragon team")) {
                 p.getLocation().add(0, 1, 0);
@@ -70,13 +79,37 @@ public final class Filetest extends JavaPlugin implements Listener {
                 tnt.setVelocity(loc.multiply(5));
             }
             if (p.getDisplayName().equalsIgnoreCase("Froppy")) {
-                if (p.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
-                    p.removePotionEffect(PotionEffectType.INVISIBILITY);
-                }
+                new BukkitRunnable() {
+                    double t = 0;
+
+                    public void run() {
+                        t = t + 0.5;
+                        Location loc = player.getLocation();
+                        Vector direction = loc.getDirection().normalize();
+                        double x = direction.getX() * t;
+                        double y = direction.getY() * t + 1.5;
+                        double z = direction.getZ() * t;
+                        loc.add(x, y, z);
+                        player.getWorld().spawnParticle(Particle.DRAGON_BREATH, loc, 0, 0, 0, 0, 1);
+                        player.getWorld().spawnParticle(Particle.DRAGON_BREATH, loc, 0, 0, 0, 0, 2);
+                        loc.subtract(x, y, z);
+                        for (Entity e : p.getNearbyEntities(100, 100, 100)) {
+                            if(e instanceof LivingEntity)
+                            if (getNearestEntityInSight(player, 10).equals(e)) {
+                                e.setVelocity(direction.multiply(-1));
+                            }
+                            else{this.cancel();}
+                            if (t > 1) {
+                                this.cancel();
+                            }
+                        }
+                    }
+                }.runTaskTimer(this, 0, 1);
             }
             if (p.getDisplayName().equalsIgnoreCase("Endavour")) {
                 Vector direction = p.getLocation().getDirection();
-                p.launchProjectile(Fireball.class, direction);;
+                p.launchProjectile(Fireball.class, direction);
+                ;
             }
             if (p.getDisplayName().equalsIgnoreCase("Deku")) {
                 for (Entity e : p.getNearbyEntities(5, 5, 5)) {
@@ -84,6 +117,9 @@ public final class Filetest extends JavaPlugin implements Listener {
                         ((Player) e).damage(10);
                     }
                 }
+            }
+            if (p.getDisplayName().equalsIgnoreCase("Tokoyami")) {
+                Bukkit.getScheduler().cancelTasks(this);
             }
         }
     }
@@ -118,17 +154,39 @@ public final class Filetest extends JavaPlugin implements Listener {
             if (p.getDisplayName().equalsIgnoreCase("Froppy")) {
                 if (p.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
                     p.removePotionEffect(PotionEffectType.INVISIBILITY);
+                } else {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 10000000, 1));
                 }
-                ;
-                p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 1000, 1));
             }
             if (p.getDisplayName().equalsIgnoreCase("Tokoyami")) {
-                createFlameRings(p);
-                for (Entity e : p.getNearbyEntities(3, 3, 3)) {
-                    if (e instanceof Player) {
-                        ((Player) e).damage(5);
+
+                new BukkitRunnable() {
+                    double t = 0;
+
+                    public void run() {
+                        t = t + 0.5;
+                        Location loc = p.getLocation();
+                        Vector direction = loc.getDirection().normalize();
+                        double x = direction.getX() * t;
+                        double y = direction.getY() * t + 1.5;
+                        double z = direction.getZ() * t;
+                        loc.add(x, y, z);
+                        p.getWorld().spawnParticle(Particle.SMOKE_NORMAL, loc, 0, 0, 0, 0, 1);
+                        p.getWorld().spawnParticle(Particle.SMOKE_NORMAL, loc, 0, 0, 0, 0, 1);
+                        p.getWorld().spawnParticle(Particle.SMOKE_NORMAL, loc, 0, 0, 0, 0, 1);
+                        loc.subtract(x, y, z);
+                        for (Entity e : p.getNearbyEntities(20, 20, 20)) {
+                            if(e instanceof LivingEntity)
+                                if (getNearestEntityInSight(p, 10).equals(e)) {
+                                    ((LivingEntity) e).damage(10);
+                                }
+                            if (t > 30) {
+                                this.cancel();
+                            }
+                        }
                     }
-                }
+                }.runTaskTimer(this, 0, 1);
+                createDarkShadow(p);
             }
             if (p.getDisplayName().equalsIgnoreCase("Endavour")) {
                 surroundFlames(p.getLocation(), 1);
@@ -159,7 +217,7 @@ public final class Filetest extends JavaPlugin implements Listener {
                 }
         }
         if (pk.getDisplayName().equalsIgnoreCase("uraraka")) {
-            p.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION,100,1));
+            p.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 100, 1));
         }
     }
 
@@ -186,13 +244,41 @@ public final class Filetest extends JavaPlugin implements Listener {
 
     }
 
-    private void createFlameRings(final Player p) {
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+
+        if (config.getBoolean("youAreAwesome")) {
+            player.sendMessage("Hello Welcome To My Hero Academia To Pick A Quirk Do /Quirk");
+        } else {
+            player.sendMessage("You are not awesome...");
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onFallDamage(EntityDamageEvent event) {
+        Player p = (Player) event.getEntity();
+        if (p.getDisplayName().equalsIgnoreCase("bakugo")) {
+            if (event.getEntity() instanceof Player && event.getCause() == EntityDamageEvent.DamageCause.FALL)
+                event.setCancelled(true);
+        }
+        if (p.getDisplayName().equalsIgnoreCase("todoroki")) {
+            if (event.getEntity() instanceof Player && event.getCause() == EntityDamageEvent.DamageCause.FALL)
+                event.setCancelled(true);
+        }
+        if (p.getDisplayName().equalsIgnoreCase("deku")) {
+            if (event.getEntity() instanceof Player && event.getCause() == EntityDamageEvent.DamageCause.FALL)
+                event.setCancelled(true);
+        }
+    }
+
+    private void createDarkShadow(final Player p) {
         new BukkitRunnable() {
             double alpha = 0;
 
             public void run() {
                 // Each cycle alpha gets increase by pi / 16 which divides the whole circle into 32 sections
-                alpha += Math.PI / 16;
+                alpha += Math.PI / 8;
 
                 /*
                  * You can add to the location based on the coordinates of a point on the circumference on a circle
@@ -202,10 +288,10 @@ public final class Filetest extends JavaPlugin implements Listener {
                 Location loc = p.getLocation();
                 Location firstLocation = loc.clone().add(Math.cos(alpha), Math.sin(alpha) + 1, Math.sin(alpha));
                 Location secondLocation = loc.clone().add(Math.cos(alpha + Math.PI), Math.sin(alpha) + 1, Math.sin(alpha + Math.PI));
-                p.spawnParticle(Particle.SMOKE_NORMAL, firstLocation, 0, 0, 0, 0, 0);
-                p.spawnParticle(Particle.SMOKE_NORMAL, secondLocation, 0, 0, 0, 0, 0);
+                p.getWorld().spawnParticle(Particle.SMOKE_NORMAL, firstLocation, 0, 0, 0, 0, 0);
+                p.getWorld().spawnParticle(Particle.SMOKE_NORMAL, secondLocation, 0, 0, 0, 0, 0);
             }
-        }.runTaskTimer((JavaPlugin.getPlugin(Filetest.class)), 0, 1);
+        }.runTaskTimer(this, 0, 1);
     }
 
     public List<Block> getBlocks(Location center, int radius,
@@ -251,5 +337,25 @@ public final class Filetest extends JavaPlugin implements Listener {
         for (Block b : getBlocks(l, r, true, false)) {
             b.setType(Material.FIRE);
         }
+    }
+
+    public static Entity getNearestEntityInSight(Player player, int range) {
+        ArrayList<Entity> entities = (ArrayList<Entity>) player.getNearbyEntities(range, range, range);
+        ArrayList<Block> sightBlock = (ArrayList<Block>) player.getLineOfSight((Set<Material>) null, range);
+        ArrayList<Location> sight = new ArrayList<Location>();
+        for (int i = 0; i < sightBlock.size(); i++)
+            sight.add(sightBlock.get(i).getLocation());
+        for (int i = 0; i < sight.size(); i++) {
+            for (int k = 0; k < entities.size(); k++) {
+                if (Math.abs(entities.get(k).getLocation().getX() - sight.get(i).getX()) < 1.3) {
+                    if (Math.abs(entities.get(k).getLocation().getY() - sight.get(i).getY()) < 1.5) {
+                        if (Math.abs(entities.get(k).getLocation().getZ() - sight.get(i).getZ()) < 1.3) {
+                            return entities.get(k);
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

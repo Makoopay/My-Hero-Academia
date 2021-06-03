@@ -46,6 +46,8 @@ public final class Filetest extends JavaPlugin implements Listener {
         this.getCommand("Tokoyami").setExecutor(new Commands());
         this.getCommand("Endavour").setExecutor(new Commands());
         this.getCommand("Uraraka").setExecutor(new Commands());
+        this.getCommand("Kirishima").setExecutor(new Commands());
+        this.getCommand("Lida").setExecutor(new Commands());
         this.getCommand("Quirk").setExecutor(new Commands());
 
     }
@@ -56,9 +58,74 @@ public final class Filetest extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void hit2(PlayerMoveEvent event) {
+
+        Player player = event.getPlayer();
+        double t = Math.PI / 8;
+        Location loc = player.getLocation();
+        Vector direction = player.getLocation().getDirection();
+
+        if (player.getDisplayName().equalsIgnoreCase("lida")) {
+            player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, loc, 0, 0, 0, 0);
+            player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, loc, 0, 0, 0, 0);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 100000000, 4));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100000000, 10));
+        }
+
+    }
+
+
+    @EventHandler
     public void hit1(PlayerInteractEvent event) {
+        Player p = event.getPlayer();
+        if (p.isSneaking()) {
+            if (event.getAction().equals(Action.LEFT_CLICK_AIR)) {
+                if (p.getDisplayName().equalsIgnoreCase("lida")) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 20));
+                }
+            }
+        }
         if (event.getAction().equals(Action.LEFT_CLICK_AIR)) {
-            Player p = event.getPlayer();
+            if (p.getDisplayName().equalsIgnoreCase("todoroki")) {
+                new BukkitRunnable() {
+                    double t = Math.PI / 8;
+                    Location loc = p.getLocation();
+                    Vector direction = p.getLocation().getDirection();
+
+                    public void run() {
+                        t = t + 1 * Math.PI;
+                        for (double theta = 0; theta <= 2 * Math.PI; theta = theta + Math.PI / 32) {
+                            double x = direction.getX() * t;
+                            double y = direction.getY() * t + 1.5;
+                            double z = direction.getZ() * t;
+                            loc.add(x, y, z);
+                            p.getWorld().spawnParticle(Particle.SNOW_SHOVEL, loc, 0, 0, 0, 0, 1);
+
+                            for (Entity e : loc.getChunk().getEntities()) {
+                                if (e.getLocation().distance(loc) < 2.0) {
+                                    if (e instanceof LivingEntity) {
+                                        if (!e.equals(p)) {
+                                            ((LivingEntity) e).damage(3);
+                                            ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 10, 1));
+                                        }
+
+                                    }
+                                }
+                            }
+                            loc.subtract(x, y, z);
+                            theta = theta + Math.PI / 64;
+
+                        }
+                        if (t > 30) {
+                            this.cancel();
+                        }
+                    }
+
+                }.runTaskTimer(this, 0, 1);
+            }
+        }
+
+        if (event.getAction().equals(Action.LEFT_CLICK_AIR)) {
             final Player player = event.getPlayer();
 
             if (p.getDisplayName().equalsIgnoreCase("dragon team")) {
@@ -73,37 +140,39 @@ public final class Filetest extends JavaPlugin implements Listener {
                 tnt.setVelocity(loc.multiply(10));
                 tnt.setFuseTicks(1);
             }
-            if (p.getDisplayName().equalsIgnoreCase("todoroki")) {
-                Vector loc = p.getEyeLocation().getDirection();
-                Snowball tnt = (Snowball) p.getWorld().spawnEntity(p.getLocation(), EntityType.SNOWBALL);
-                tnt.setVelocity(loc.multiply(5));
-            }
             if (p.getDisplayName().equalsIgnoreCase("Froppy")) {
                 new BukkitRunnable() {
-                    double t = 0;
+                    double t = Math.PI / 8;
+                    Location loc = player.getLocation();
+                    Vector direction = player.getLocation().getDirection();
 
                     public void run() {
-                        t = t + 0.5;
-                        Location loc = player.getLocation();
-                        Vector direction = loc.getDirection().normalize();
-                        double x = direction.getX() * t;
-                        double y = direction.getY() * t + 1.5;
-                        double z = direction.getZ() * t;
-                        loc.add(x, y, z);
-                        player.getWorld().spawnParticle(Particle.DRAGON_BREATH, loc, 0, 0, 0, 0, 1);
-                        player.getWorld().spawnParticle(Particle.DRAGON_BREATH, loc, 0, 0, 0, 0, 2);
-                        loc.subtract(x, y, z);
-                        for (Entity e : p.getNearbyEntities(100, 100, 100)) {
-                            if(e instanceof LivingEntity)
-                            if (getNearestEntityInSight(player, 10).equals(e)) {
-                                e.setVelocity(direction.multiply(-1));
+                        t = t + 1 * Math.PI;
+                        for (double theta = 0; theta <= 2 * Math.PI; theta = theta + Math.PI / 32) {
+                            double x = direction.getX() * t;
+                            double y = direction.getY() * t + 1.5;
+                            double z = direction.getZ() * t;
+                            loc.add(x, y, z);
+                            player.getWorld().spawnParticle(Particle.DRAGON_BREATH, loc, 0, 0, 0, 0, 1);
+
+                            for (Entity e : loc.getChunk().getEntities()) {
+                                if (e.getLocation().distance(loc) < 2.0) {
+                                    if (e instanceof LivingEntity) {
+                                        if (!e.equals(player)) {
+                                            e.setVelocity(player.getLocation().getDirection().multiply(-2));
+                                        }
+                                    }
+                                }
                             }
-                            else{this.cancel();}
-                            if (t > 1) {
-                                this.cancel();
-                            }
+                            loc.subtract(x, y, z);
+                            theta = theta + Math.PI / 64;
+
+                        }
+                        if (t > 30) {
+                            this.cancel();
                         }
                     }
+
                 }.runTaskTimer(this, 0, 1);
             }
             if (p.getDisplayName().equalsIgnoreCase("Endavour")) {
@@ -112,6 +181,7 @@ public final class Filetest extends JavaPlugin implements Listener {
                 ;
             }
             if (p.getDisplayName().equalsIgnoreCase("Deku")) {
+
                 for (Entity e : p.getNearbyEntities(5, 5, 5)) {
                     if (e instanceof Player) {
                         ((Player) e).damage(10);
@@ -127,75 +197,82 @@ public final class Filetest extends JavaPlugin implements Listener {
     @EventHandler
     public void Shift(PlayerToggleSneakEvent event) {
         if (event.getPlayer().isSneaking()) {
-            Player p = event.getPlayer();
-            if (p.getDisplayName().equalsIgnoreCase("dragon team")) {
-                p.getLocation().add(0, 1, 0);
-                Vector direction = p.getLocation().getDirection();
-                p.launchProjectile(DragonFireball.class, direction);
+            if (event.getPlayer().getDisplayName().equalsIgnoreCase("todoroki")) {
+                event.getPlayer().launchProjectile(Fireball.class);
             }
-            if (p.getDisplayName().equalsIgnoreCase("bakugo")) {
-                Vector loc = p.getLocation().getDirection();
 
-                TNTPrimed tnt = (TNTPrimed) p.getWorld().spawnEntity(p.getLocation(), EntityType.PRIMED_TNT);
-                p.setVelocity(loc.multiply(3));
-                tnt.setFuseTicks(0);
-            }
-            if (p.getDisplayName().equalsIgnoreCase("todoroki")) {
-                p.getLocation().add(0, 1, 0);
-                Vector direction = p.getLocation().getDirection();
-                p.launchProjectile(Fireball.class, direction);
-            }
-            if (p.getDisplayName().equalsIgnoreCase("deku")) {
-                p.getLocation().add(0, 1, 0);
-                p.getWorld().spawnParticle(Particle.CRIT_MAGIC, p.getLocation(), 10);
-                Vector direction = p.getLocation().getDirection();
-                p.setVelocity(direction.multiply(3));
-            }
-            if (p.getDisplayName().equalsIgnoreCase("Froppy")) {
-                if (p.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
-                    p.removePotionEffect(PotionEffectType.INVISIBILITY);
-                } else {
-                    p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 10000000, 1));
+            if (event.getPlayer().isSneaking()) {
+                Player p = event.getPlayer();
+                if (p.getDisplayName().equalsIgnoreCase("dragon team")) {
+                    p.getLocation().add(0, 1, 0);
+                    Vector direction = p.getLocation().getDirection();
+                    p.launchProjectile(DragonFireball.class, direction);
                 }
-            }
-            if (p.getDisplayName().equalsIgnoreCase("Tokoyami")) {
+                if (p.getDisplayName().equalsIgnoreCase("bakugo")) {
+                    Vector loc = p.getLocation().getDirection();
 
-                new BukkitRunnable() {
-                    double t = 0;
+                    TNTPrimed tnt = (TNTPrimed) p.getWorld().spawnEntity(p.getLocation(), EntityType.PRIMED_TNT);
+                    p.setVelocity(loc.multiply(3));
+                    tnt.setFuseTicks(0);
+                }
+                if (p.getDisplayName().equalsIgnoreCase("deku")) {
+                    p.getLocation().add(0, 1, 0);
+                    p.getWorld().spawnParticle(Particle.CRIT_MAGIC, p.getLocation(), 10);
+                    Vector direction = p.getLocation().getDirection();
+                    p.setVelocity(direction.multiply(3));
+                }
+                if (p.getDisplayName().equalsIgnoreCase("Froppy")) {
+                    if (p.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
+                        p.removePotionEffect(PotionEffectType.INVISIBILITY);
+                    } else {
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 10000000, 1));
+                    }
+                }
+                if (p.getDisplayName().equalsIgnoreCase("Tokoyami")) {
+                    Player player = event.getPlayer();
 
-                    public void run() {
-                        t = t + 0.5;
-                        Location loc = p.getLocation();
-                        Vector direction = loc.getDirection().normalize();
-                        double x = direction.getX() * t;
-                        double y = direction.getY() * t + 1.5;
-                        double z = direction.getZ() * t;
-                        loc.add(x, y, z);
-                        p.getWorld().spawnParticle(Particle.SMOKE_NORMAL, loc, 0, 0, 0, 0, 1);
-                        p.getWorld().spawnParticle(Particle.SMOKE_NORMAL, loc, 0, 0, 0, 0, 1);
-                        p.getWorld().spawnParticle(Particle.SMOKE_NORMAL, loc, 0, 0, 0, 0, 1);
-                        loc.subtract(x, y, z);
-                        for (Entity e : p.getNearbyEntities(20, 20, 20)) {
-                            if(e instanceof LivingEntity)
-                                if (getNearestEntityInSight(p, 10).equals(e)) {
-                                    ((LivingEntity) e).damage(10);
+                    new BukkitRunnable() {
+                        double t = 0;
+
+                        public void run() {
+                            t = t + 0.5;
+                            Location loc = p.getLocation();
+                            Vector direction = loc.getDirection().normalize();
+                            double x = direction.getX() * t;
+                            double y = direction.getY() * t + 1.5;
+                            double z = direction.getZ() * t;
+                            loc.add(x, y, z);
+                            p.getWorld().spawnParticle(Particle.SMOKE_NORMAL, loc, 0, 0, 0, 0, 1);
+                            p.getWorld().spawnParticle(Particle.SMOKE_NORMAL, loc, 0, 0, 0, 0, 1);
+                            p.getWorld().spawnParticle(Particle.SMOKE_NORMAL, loc, 0, 0, 0, 0, 1);
+                            for (Entity e : loc.getChunk().getEntities()) {
+                                if (e.getLocation().distance(loc) < 2.0) {
+                                    if (e instanceof LivingEntity) {
+                                        if (!e.equals(player)) {
+                                            ((LivingEntity) e).damage(10);
+                                        }
+                                    }
                                 }
+                            }
+
+                            loc.subtract(x, y, z);
                             if (t > 30) {
                                 this.cancel();
                             }
                         }
-                    }
-                }.runTaskTimer(this, 0, 1);
-                createDarkShadow(p);
-            }
-            if (p.getDisplayName().equalsIgnoreCase("Endavour")) {
-                surroundFlames(p.getLocation(), 1);
-                surroundFlames(p.getLocation(), 2);
-                surroundFlames(p.getLocation(), 3);
-                surroundFlames(p.getLocation(), 4);
+                    }.runTaskTimer(this, 0, 1);
+                    createDarkShadow(p);
+                }
+                if (p.getDisplayName().equalsIgnoreCase("Endavour")) {
+                    surroundFlames(p.getLocation(), 1);
+                    surroundFlames(p.getLocation(), 2);
+                    surroundFlames(p.getLocation(), 3);
+                    surroundFlames(p.getLocation(), 4);
+                }
             }
         }
     }
+
 
     @SuppressWarnings("deprecation")
     @EventHandler
@@ -338,6 +415,7 @@ public final class Filetest extends JavaPlugin implements Listener {
             b.setType(Material.FIRE);
         }
     }
+
 
     public static Entity getNearestEntityInSight(Player player, int range) {
         ArrayList<Entity> entities = (ArrayList<Entity>) player.getNearbyEntities(range, range, range);

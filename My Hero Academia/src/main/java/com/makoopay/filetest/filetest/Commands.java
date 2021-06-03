@@ -39,6 +39,7 @@ public class Commands implements CommandExecutor {
                 Filetest.DragonTeam.put(p.getUniqueId(), 1);
                 p.sendMessage(ChatColor.BLUE + "Your Todoroki Now");
                 p.setDisplayName("Todoroki");
+                p.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 100000000, 10));
             }
             if (cmd.getName().equalsIgnoreCase("Froppy")) {
                 Player p = (Player) sdr;
@@ -64,8 +65,35 @@ public class Commands implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("Uraraka")) {
                 Player p = (Player) sdr;
                 Filetest.DragonTeam.put(p.getUniqueId(), 1);
-                p.sendMessage(ChatColor.BLACK + "Your Uraraka Now");
+                p.sendMessage(ChatColor.LIGHT_PURPLE + "Your Uraraka Now");
                 p.setDisplayName("Uraraka");
+            }
+            if (cmd.getName().equalsIgnoreCase("Kirishima")) {
+                Player player = (Player) sdr;
+                Filetest.DragonTeam.put(player.getUniqueId(), 1);
+                player.sendMessage(ChatColor.DARK_RED + "Your Kirishima Now");
+                player.setDisplayName("Kirishima");
+                player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 100000000, 1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 1000000000, 1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 1000000000, 1));
+            }
+            if (cmd.getName().equalsIgnoreCase("Lida")) {
+                Player player = (Player) sdr;
+                Filetest.DragonTeam.put(player.getUniqueId(), 1);
+                player.sendMessage(ChatColor.DARK_RED + "Your Lida Now");
+                player.setDisplayName("Lida");
+            }
+            if (cmd.getName().equalsIgnoreCase("Quirk")) {
+                Player p = (Player) sdr;
+                p.sendMessage("/Tokoyami" +
+                        "/Todoroki" +
+                        "/Deku" +
+                        "/Bakugo" +
+                        "/Endeavour" +
+                        "/Froppy" +
+                        "/Uraraka" +
+                        "/Kirishima" +
+                        "/Lida");
             }
         }
         return true;
